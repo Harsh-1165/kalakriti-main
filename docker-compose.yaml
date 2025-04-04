@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  mongo:
+    image: mongo
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - kalakriti-mongo-data:/data/db
+    networks:
+      - kalakriti-network
+
+  backend:
+    image: kalakriti:latest
+    container_name: kalakriti-backend
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env
+    depends_on:
+      - mongo
+    networks:
+      - kalakriti-network
+
+  frontend:
+    image: kalakriti-frontend
+    container_name: kalakriti-frontend
+    ports:
+      - "8080:80"  # Change to "80:80" if port 80 is available
+    depends_on:
+      - backend
+    networks:
+      - kalakriti-network
+
+volumes:
+  kalakriti-mongo-data:
+
+networks:
+  kalakriti-network:
+    driver: bridge
