@@ -8,6 +8,7 @@ const otpStore = {};
 export const register = async (req, res) => {
   try {
     const { name, email, password } = req.body;
+    console.log(req.body);
 
     const existingUser = await User.findOne({ email });
     if (existingUser) return res.status(400).json({ message: 'User already exists' });
@@ -17,6 +18,8 @@ export const register = async (req, res) => {
     // Save user with OTP temporarily (before verification)
     const user = new User({ name, email, password, otp });
     await user.save();
+    console.log(" " + process.env.EMAIL_PASS +  process.env.EMAIL_USER)
+    
 
     // Send OTP email
     const transporter = nodemailer.createTransport({
@@ -64,14 +67,14 @@ export const sendOtp = async (req, res) => {
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
-        user: process.env.GMAIL_USER,
-        pass: process.env.GMAIL_APP_PASSWORD
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
       }
     });
 
     // Send mail first, then respond
     await transporter.sendMail({
-      from: `"Kalakriti" <${process.env.GMAIL_USER}>`,
+      from: `"Kalakriti" <${process.env.EMAIL_USER}>`,
       to: email,
       subject: 'Your OTP for Kalakriti Registration',
       html: `

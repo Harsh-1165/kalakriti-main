@@ -8,7 +8,7 @@ import orderRoutes from './routes/order.routes.js';
 import addressRoutes from './routes/address.routes.js';
 
 dotenv.config();
-
+console.log(" " + process.env.EMAIL_PASS +  process.env.EMAIL_USER)
 const app = express();
 
 // Middleware
