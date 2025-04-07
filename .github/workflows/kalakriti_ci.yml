@@ -36,3 +36,19 @@ jobs:
         docker run -d -p 5000:5000 --name kalakriti \
           -e MONGO_PASSWORD="${{ secrets.MONGO_PASSWORD }}" \
           ${{ secrets.DOCKER_USERNAME }}/kalakriti-app:latest
+   
+    - name: Set up SSH
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.EC2_KEY }}" | base64 -d > ~/.ssh/ec2_key.pem
+        chmod 600 ~/.ssh/ec2_key.pem
+
+    - name: Deploy to EC2
+      run: |
+        ssh -i ~/.ssh/ec2_key.pem -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "rm -rf kalakriti-main && mkdir kalakriti-main"
+        scp -i ~/.ssh/ec2_key.pem -o StrictHostKeyChecking=no -r . ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:~/kalakriti-main
+        ssh -i ~/.ssh/ec2_key.pem -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << EOF
+          cd kalakriti-main
+          docker compose down || true
+          docker compose up -d --build
+        EOF
